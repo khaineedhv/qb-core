@@ -1,4 +1,21 @@
 QBCore.Functions = {}
+QBCore.RequestId = 0
+QBCore.Font = 0
+-- Font
+Citizen.CreateThread(function()
+    RegisterFontFile('Akrobat-Regular') 
+    QBCore.Font = RegisterFontId('Akrobat-Regular')
+    AddTextEntry('CUSTOM_STRING', "<FONT FACE='Akrobat-Regular'>~a~</FONT>")
+    AddTextEntry('STRING', "<FONT FACE='Akrobat-Regular'>~a~</FONT>")
+end)
+
+QBCore.Functions.FloatingNotification = function(msg, x,y,z)
+    AddTextEntry('FloatingNotification', "<FONT FACE='Akrobat-Regular'>"..msg.."</FONT>")
+    SetFloatingHelpTextWorldPosition(1, x, y, z)
+    SetFloatingHelpTextStyle(1, 1, 2, -1, 3, 0)
+    BeginTextCommandDisplayHelp('FloatingNotification')
+    EndTextCommandDisplayHelp(2, false, false, -1)
+end
 
 -- Player
 
@@ -955,4 +972,23 @@ function QBCore.Functions.StartParticleOnEntity(dict, ptName, looped, entity, bo
         end
     end
     return particleHandle
+end
+
+QBCore.Functions.SpawnLocalObject = function(model, coords, cb)
+	local model = (type(model) == 'number' and model or GetHashKey(model))
+
+	Citizen.CreateThread(function()
+		RequestModel(model)
+		local obj = CreateObject(model, coords.x, coords.y, coords.z, false, false, true)
+		SetModelAsNoLongerNeeded(model)
+
+		if cb then
+			cb(obj)
+		end
+	end)
+end
+
+QBCore.Functions.DeleteObject = function(object)
+	SetEntityAsMissionEntity(object, false, true)
+	DeleteObject(object)
 end
